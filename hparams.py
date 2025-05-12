@@ -2,10 +2,19 @@ import tensorflow as tf
 from text import symbols
 
 
-def create_hparams(hparams_string=None, verbose=False):
-    """Create model hyperparameters. Parse nondefault from given string."""
+class HParams:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
-    hparams = tf.contrib.training.HParams(
+    def set_hparam(self, key, value):
+        self.__dict__[key] = value
+
+    def get_hparam(self, key):
+        return self.__dict__.get(key, None)
+
+
+def create_hparams(hparams_string=None):
+    hparams = HParams(
         ################################
         # Experiment Parameters        #
         ################################
@@ -86,10 +95,8 @@ def create_hparams(hparams_string=None, verbose=False):
     )
 
     if hparams_string:
-        tf.logging.info('Parsing command line hparams: %s', hparams_string)
-        hparams.parse(hparams_string)
-
-    if verbose:
-        tf.logging.info('Final parsed hparams: %s', hparams.values())
+        for pair in hparams_string.split(","):
+            key, value = pair.split("=")
+            setattr(hparams, key, eval(value))
 
     return hparams
